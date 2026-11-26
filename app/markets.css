@@ -1080,3 +1080,8 @@ body:has(.sb-bar) { padding-bottom: 36px; }
   pointer-events: none;
 }
 .pro .p-search.grow input { background: var(--color-paper-2); border: 1px solid var(--color-rule); border-radius: 8px; }
+
+/* The Openmarkets mark is a green O on white, so its tile is white in every theme. */
+:root { --color-mark-ground: #ffffff; }
+.pc-brand-mark, .pro .p-brand-mark { background: var(--color-mark-ground); border: 1px solid var(--color-rule); overflow: hidden; }
+.brand-mark-img { display: block; object-fit: contain; }

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="app/icon.svg" width="72" alt="Openmarkets logo" />
+  <img src="public/logos/openmarkets-icon.png" width="96" alt="Openmarkets logo" />
 </p>
 
 <h1 align="center">Openmarkets</h1>

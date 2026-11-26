@@ -38,7 +38,7 @@ export function MarketHeader({ view = "markets", onView, search }: {
       <div className="pc-header-inner">
         <Link href="/" className="pc-brand" aria-label="Openmarkets home">
           <span className="pc-brand-mark" aria-hidden="true">
-            <BrandMark size={20} />
+            <BrandMark size={32} />
           </span>
           <span className="pc-brand-name">Openmarkets</span>
         </Link>

@@ -172,7 +172,7 @@ export function ProShell({ active, data, history, search, onNav, children }: {
       <div className="p-header-inner">
         <button type="button" className="p-menu-btn" onClick={() => setDrawer(true)} aria-label="Open navigation" aria-expanded={drawer}><Menu size={18} /></button>
         <Link href="/" className="p-brand" aria-label="Openmarkets home">
-          <span className="p-brand-mark"><BrandMark size={18} /></span>
+          <span className="p-brand-mark"><BrandMark size={28} /></span>
           <span className="p-brand-name">Openmarkets</span>
           <span className="p-lbl">Private Markets Data · Pro</span>
         </Link>

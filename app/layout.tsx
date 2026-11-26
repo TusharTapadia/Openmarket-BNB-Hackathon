@@ -39,10 +39,6 @@ export const metadata: Metadata = {
   title: "Openmarkets",
   applicationName: "Openmarkets",
   description: "Private market pricing, valuations, funding and research.",
-  icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-  },
 };
 
 export default async function RootLayout({
