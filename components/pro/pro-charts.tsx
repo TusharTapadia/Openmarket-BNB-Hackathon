@@ -43,7 +43,7 @@ export function RebasedChart({ lines, label }: { lines: Line[]; label: string })
       {ticks.map((tick) => <div key={tick}><span className="p-mono">{tick.toFixed(1)}</span></div>)}
     </div>
     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={label}>
-      <line x1={0} x2={W} y1={toY(100)} y2={toY(100)} stroke="#9ca3af" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
+      <line x1={0} x2={W} y1={toY(100)} y2={toY(100)} stroke="var(--color-muted)" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
       {rebased.map((line) => (
         <polyline key={line.key} points={line.values.map((value) => `${toX(value.x).toFixed(1)},${toY(value.y).toFixed(1)}`).join(" ")}
           fill="none" stroke={line.colour} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
@@ -82,11 +82,11 @@ export function SplitPriceChart({ points, label, money }: { points: DailyClose[]
         <clipPath id={`${id}-up`}><rect x={0} y={0} width={W} height={Math.max(baseY, 0)} /></clipPath>
         <clipPath id={`${id}-dn`}><rect x={0} y={baseY} width={W} height={Math.max(H - baseY, 0)} /></clipPath>
       </defs>
-      <polygon points={area} fill="#10b981" fillOpacity={0.1} clipPath={`url(#${id}-up)`} />
-      <polygon points={area} fill="#ef4444" fillOpacity={0.1} clipPath={`url(#${id}-dn)`} />
-      <line x1={0} x2={W} y1={baseY} y2={baseY} stroke="#9ca3af" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
-      <polyline points={line} fill="none" stroke="#10b981" strokeWidth={2} strokeLinejoin="round" vectorEffect="non-scaling-stroke" clipPath={`url(#${id}-up)`} />
-      <polyline points={line} fill="none" stroke="#ef4444" strokeWidth={2} strokeLinejoin="round" vectorEffect="non-scaling-stroke" clipPath={`url(#${id}-dn)`} />
+      <polygon points={area} fill="var(--up)" fillOpacity={0.1} clipPath={`url(#${id}-up)`} />
+      <polygon points={area} fill="var(--down)" fillOpacity={0.1} clipPath={`url(#${id}-dn)`} />
+      <line x1={0} x2={W} y1={baseY} y2={baseY} stroke="var(--color-muted)" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
+      <polyline points={line} fill="none" stroke="var(--up)" strokeWidth={2} strokeLinejoin="round" vectorEffect="non-scaling-stroke" clipPath={`url(#${id}-up)`} />
+      <polyline points={line} fill="none" stroke="var(--down)" strokeWidth={2} strokeLinejoin="round" vectorEffect="non-scaling-stroke" clipPath={`url(#${id}-dn)`} />
     </svg>
     <div className="p-linechart-x p-mono" aria-hidden>{xTicks.map((date, position) => <span key={`${date}-${position}`}>{shortDate(date)}</span>)}</div>
   </div>;
@@ -100,7 +100,7 @@ export function PSpark({ points, width = 104, height = 30, label }: { points: nu
   const high = Math.max(...values);
   const span = high - low || 1;
   const line = values.map((value, index) => `${(index * width / (values.length - 1)).toFixed(1)},${(height - 3 - (value - low) / span * (height - 6)).toFixed(1)}`).join(" ");
-  const colour = values[values.length - 1] >= values[0] ? "#10b981" : "#ef4444";
+  const colour = values[values.length - 1] >= values[0] ? "var(--up)" : "var(--down)";
   return <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label} className="p-spark">
     <polygon points={`${line} ${width},${height} 0,${height}`} fill={colour} fillOpacity={0.08} />
     <polyline points={line} fill="none" stroke={colour} strokeWidth={1.6} strokeLinejoin="round" strokeLinecap="round" />

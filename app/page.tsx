@@ -7,7 +7,7 @@ import { MarketHeader } from "@/components/market-header";
 import { IST } from "@/components/market-ticker";
 import { DataState } from "@/components/data-state";
 import { Flash } from "@/components/flash";
-import { Skeleton, SkeletonInline, SkeletonLines, SkeletonList, useCrosshair } from "@/components/skeleton";
+import { SkeletonInline, SkeletonLines, SkeletonList, useCrosshair } from "@/components/skeleton";
 import { COVERAGE_COMPANIES } from "@/lib/market-coverage/shared";
 import { InfoTip } from "@/components/info-tip";
 import { ChangeBadge, DivBar, Mark, Pct, Spark } from "@/components/pc";
@@ -207,8 +207,7 @@ function LiteHome() {
           </div>
           {loading ? <div className="mk-hero-body mk-hero-loading">
               {/* One placeholder row per covered company, so the list keeps its height when the data lands. */}
-              <Skeleton height={10} radius={2} />
-              <SkeletonList rows={COVERAGE_COMPANIES.length} label="Loading market volume" mark={30} />
+              <SkeletonList rows={COVERAGE_COMPANIES.length} label="Loading market volume" mark={30} bar={10} />
             </div>
             : periodTotal > 0 ? <div className="mk-hero-body">
               <div className="pc-share-bar" style={{ height: 14 }} role="img" aria-label={`${period} volume split by company`}>

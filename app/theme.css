@@ -1,0 +1,158 @@
+/*
+ * Light and dark for both views.
+ *
+ * <html data-mode> picks the view (Lite paper, Pro graphite) and
+ * <html data-theme> the scheme. app/markets.css holds the two original
+ * colourways, paper-light (:root) and graphite-dark; this file adds the other
+ * two, so all four combinations read from the same token names:
+ *
+ *   Lite · light  paper, warm light       (markets.css :root)
+ *   Lite · dark   paper, warm dark        (here)
+ *   Pro  · dark   graphite, cool dark     (markets.css)
+ *   Pro  · light  graphite, cool light    (here)
+ *
+ * The accent keeps one hue (amber, ~70-80) in all four; only its lightness
+ * moves so it holds contrast on each ground.
+ */
+
+/* ---------- Paper, dark: Lite with the lights off ---------- */
+:root[data-mode="lite"][data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper: oklch(18.5% 0.009 70);
+  --color-paper-2: oklch(22.5% 0.01 70);
+  --color-paper-3: oklch(15% 0.008 70);
+  --color-ink: oklch(95% 0.007 85);
+  --color-ink-2: oklch(84% 0.009 80);
+  --color-muted: oklch(72% 0.013 75);
+  --color-rule: oklch(32% 0.011 70);
+  --color-rule-2: oklch(44% 0.013 70);
+  --color-accent: oklch(80% 0.14 75);
+  --color-accent-ink: oklch(18% 0.04 70);
+  --color-accent-soft: oklch(30% 0.05 75);
+  --color-focus: oklch(80% 0.14 75);
+  --color-cool: oklch(77% 0.11 245);
+  --color-cool-soft: oklch(29.5% 0.045 245);
+  --color-ok: oklch(76% 0.14 150);
+  --color-ok-soft: oklch(25.5% 0.03 150);
+  --color-bad: oklch(71% 0.16 27);
+  --color-bad-soft: oklch(26% 0.04 25);
+  --color-scrim: oklch(8% 0.01 60 / 0.62);
+
+  --series-1: oklch(80% 0.02 75);
+  --series-2: oklch(70% 0.13 245);
+  --series-3: oklch(80% 0.14 78);
+  --series-4: oklch(72% 0.14 155);
+  --series-5: oklch(68% 0.13 300);
+  --series-6: oklch(64% 0.07 55);
+  --series-7: oklch(56% 0.015 70);
+  --series-8: oklch(52% 0.08 245);
+  --series-rest: oklch(39% 0.011 70);
+
+  --shadow-ink: oklch(5% 0.01 60);
+}
+
+/* ---------- Graphite, light: Pro on a bright desk ---------- */
+:root[data-mode="pro"][data-theme="light"] {
+  color-scheme: light;
+  --color-paper: oklch(97% 0.004 250);
+  --color-paper-2: oklch(99.5% 0.002 250);
+  --color-paper-3: oklch(94.2% 0.006 250);
+  --color-ink: oklch(19% 0.014 250);
+  --color-ink-2: oklch(33% 0.014 250);
+  --color-muted: oklch(46% 0.016 250);
+  --color-rule: oklch(89.5% 0.007 250);
+  --color-rule-2: oklch(78% 0.011 250);
+  --color-accent: oklch(50% 0.13 70);
+  --color-accent-ink: oklch(99% 0.004 250);
+  --color-accent-soft: oklch(94% 0.045 82);
+  --color-focus: oklch(50% 0.13 70);
+  --color-cool: oklch(47% 0.14 250);
+  --color-cool-soft: oklch(94% 0.028 250);
+  --color-ok: oklch(46% 0.12 150);
+  --color-ok-soft: oklch(95% 0.035 150);
+  --color-bad: oklch(51% 0.19 27);
+  --color-bad-soft: oklch(95.5% 0.025 25);
+  --color-scrim: oklch(19% 0.014 250 / 0.45);
+
+  --series-1: oklch(28% 0.03 250);
+  --series-2: oklch(58% 0.13 245);
+  --series-3: oklch(72% 0.14 75);
+  --series-4: oklch(60% 0.13 155);
+  --series-5: oklch(55% 0.12 300);
+  --series-6: oklch(48% 0.06 55);
+  --series-7: oklch(68% 0.015 250);
+  --series-8: oklch(80% 0.06 245);
+  --series-rest: oklch(85% 0.007 250);
+}
+
+/* Fear & Greed bands (components/fear-greed.tsx): red through amber to green,
+   deep enough to read as text on light grounds, lifted on dark ones. */
+:root {
+  --fg-band-1: oklch(52% 0.17 28);
+  --fg-band-2: oklch(60% 0.15 48);
+  --fg-band-3: oklch(64% 0.13 85);
+  --fg-band-4: oklch(56% 0.12 140);
+  --fg-band-5: oklch(48% 0.12 145);
+}
+:root[data-theme="dark"] {
+  --fg-band-1: oklch(68% 0.17 27);
+  --fg-band-2: oklch(73% 0.14 50);
+  --fg-band-3: oklch(82% 0.14 85);
+  --fg-band-4: oklch(76% 0.13 140);
+  --fg-band-5: oklch(70% 0.14 145);
+}
+
+/* Shadows are drawn in the ink of the ground they fall on, never in a light
+   ink on a dark ground (which reads as a glow). */
+:root { --shadow-ink: var(--color-ink); }
+:root[data-mode="pro"][data-theme="dark"] { --shadow-ink: oklch(5% 0.01 250); }
+
+/* ---------- The light / dark switch, in both headers ---------- */
+.theme-toggle {
+  all: unset; box-sizing: border-box; cursor: pointer; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: var(--radius-pill);
+  border: 1px solid var(--color-rule); background: var(--color-paper-3); color: var(--color-ink-2);
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.theme-toggle:hover { background: var(--color-paper-2); color: var(--color-ink); border-color: var(--color-rule-2); }
+.theme-toggle:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.theme-toggle-pro { width: 36px; height: 36px; background: var(--color-paper-2); }
+.theme-toggle-pro:hover { background: var(--color-paper-3); }
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle { transition: none; }
+}
+
+/* Search, the Lite / Pro switch and the scheme button stay on one row in the Lite header. */
+@media (min-width: 761px) {
+  .pc-header-tools { flex-wrap: nowrap; }
+}
+
+/* The Lite status bar under the nav is an inverted (ink) band on light
+   grounds; on dark grounds an ink band would be the brightest thing on the
+   page, so it sinks to the deepest paper instead and keeps its rule. */
+:root[data-theme="dark"] .ticker-strip { background: var(--color-paper-3); color: var(--color-ink); border-bottom: 1px solid var(--color-rule); }
+
+/* Pro's inverted (ink) panels, the overview hero and navy cards, do the same:
+   dark bands on light grounds, the deepest paper on dark ones. */
+:root[data-theme="dark"] .pro .p-hero,
+:root[data-theme="dark"] .pro .p-navy-card {
+  --p-on-navy: var(--color-muted);
+  background: var(--color-paper-3); color: var(--color-ink);
+}
+:root[data-theme="dark"] .pro .p-hero { border-bottom: 1px solid var(--color-rule); }
+:root[data-theme="dark"] .pro .p-hero .p-kpi-strip { border-top-color: var(--color-rule); }
+:root[data-theme="dark"] .pro .p-hero .p-kpi-strip > div { border-right-color: var(--color-rule); }
+:root[data-theme="dark"] .pro .p-navy-card .p-mix-row strong { color: var(--color-ink); }
+:root[data-theme="dark"] .pro .p-hero .p-kpi-strip > div { border-bottom-color: var(--color-rule); }
+
+/* On the ink band in light schemes, secondary text is a step of the band's
+   own text colour rather than the page's muted, which sinks into the band. */
+:root[data-theme="light"] .pro .p-navy-card .p-mix-row em,
+:root[data-theme="light"] .pro .p-hero .p-kpi-strip small {
+  color: color-mix(in oklab, var(--color-paper-2) 68%, var(--p-navy));
+}
+:root[data-theme="light"] .ticker-strip em,
+:root[data-theme="light"] .ticker-status {
+  color: color-mix(in oklab, var(--color-paper-2) 68%, var(--color-ink));
+}

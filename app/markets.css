@@ -18,7 +18,9 @@
  *
  * Lite is the paper colourway, Pro the graphite one, keyed off
  * <html data-mode>, which the layout sets from the cookie and the switch
- * updates, so portals (tooltips, menus) follow and nothing flashes.
+ * updates, so portals (tooltips, menus) follow and nothing flashes. Each comes
+ * light or dark (<html data-theme>); paper-light and graphite-dark live here,
+ * paper-dark and graphite-light in app/theme.css.
  */
 
 /* ---------- Colourways ---------- */
@@ -62,7 +64,8 @@
   --gutter-app: 28px;
 }
 
-:root[data-mode="pro"] {
+/* Graphite, dark: Pro by default. */
+:root[data-mode="pro"][data-theme="dark"] {
   color-scheme: dark;
   --color-paper: oklch(17% 0.008 250);
   --color-paper-2: oklch(21% 0.009 250);
@@ -1025,3 +1028,55 @@ body:has(.sb-bar) { padding-bottom: 36px; }
 
 /* The Openmarkets mark in the Pro header: a small ink chip, like Lite's. */
 .pro .p-brand-mark { width: 30px; height: 30px; border-radius: var(--radius-pill); background: var(--color-ink); color: var(--color-paper); display: inline-flex; align-items: center; justify-content: center; flex: none; }
+
+/* The crosshair skeleton hosts: the box it traces and overlays while loading. */
+/* Was display: contents; the crosshair needs a box to trace, so the host takes the
+   placeholder's own column layout (and its gap) instead. */
+.sk > .sk-host { display: flex; flex-direction: column; gap: inherit; flex: 1 1 auto; min-height: 0; width: 100%; position: relative; }
+.sk-inline-host { display: inline-flex; position: relative; }
+
+/* ---------- Pro All markets: source column on child rows ---------- */
+.pro .p-src-cell { display: inline-flex; align-items: center; gap: var(--space-xs); min-width: 0; }
+.pro .p-src-cell .p-mc-text { display: flex; flex-direction: column; min-width: 0; }
+.pro .p-src-cell strong { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pro .p-src-cell small { font-size: 11.5px; }
+.pro .p-child-id strong { font-family: var(--font-body); font-size: 13px; font-weight: 500; }
+
+/* ---------- Dropdowns: one control style, a drawn chevron with room to breathe ---------- */
+.pro .p-select select, .pc-select select, select.pc-select {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 32px;
+  min-width: 120px;
+  padding: 0 32px 0 12px;
+  border: 1px solid var(--color-rule);
+  border-radius: 8px;
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 30px;
+  cursor: pointer;
+  transition: border-color var(--dur-short, 120ms) ease;
+}
+.pro .p-select select:hover, .pc-select select:hover, select.pc-select:hover { border-color: var(--color-muted); }
+.pro .p-select select:focus-visible, .pc-select select:focus-visible, select.pc-select:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+.pro .p-select select option { background: var(--color-paper-2); color: var(--color-ink); }
+.pro .p-select .p-lbl { color: var(--color-muted); font-size: 12px; white-space: nowrap; }
+
+/* The chevron: a line drawn by the label (a select can't hold a pseudo-element), in the muted ink. */
+.pro .p-select { position: relative; }
+.pro .p-select::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  background: var(--color-muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5 5 6.5 8 3.5' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5 5 6.5 8 3.5' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  pointer-events: none;
+}
+.pro .p-search.grow input { background: var(--color-paper-2); border: 1px solid var(--color-rule); border-radius: 8px; }

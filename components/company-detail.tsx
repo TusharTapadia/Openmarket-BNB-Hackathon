@@ -25,8 +25,8 @@ import { RequestAccessLink } from "@/components/request-access-link";
 import { TradeButton } from "@/components/trade/trade-button";
 
 const DAY = 1;
-const VENUE_COLOURS = ["#0f1a2b", "#1f87dd", "#f29d12", "#5a4632", "#9ca3af", "#bcd8fb", "#1fbf6c", "#374151"];
-const SHARE_SHADES = ["#0f1a2b", "#1f87dd", "#bcd8fb", "#f29d12"];
+const VENUE_COLOURS = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(--series-6)", "var(--series-7)", "var(--series-8)", "var(--series-4)", "var(--series-5)"];
+const SHARE_SHADES = ["var(--series-1)", "var(--series-2)", "var(--series-8)", "var(--series-3)"];
 
 const records = ["Funding", "News", "Research", "About"] as const;
 type Record_ = typeof records[number];
@@ -155,7 +155,7 @@ export function CompanyDetail({ slug }: { slug: string }) {
   const byVolume = [...company.rows].sort((a, b) => (b.volume30dUsd ?? 0) - (a.volume30dUsd ?? 0));
   const shareSegments = totals.volume30dUsd > 0 ? [
     ...byVolume.slice(0, 4).filter((row) => (row.volume30dUsd ?? 0) > 0).map((row, index) => ({ label: `${row.provider} ${row.label}`, share: (row.volume30dUsd ?? 0) / totals.volume30dUsd, colour: SHARE_SHADES[index] })),
-    ...(byVolume.length > 4 ? [{ label: plural(byVolume.length - 4, "other"), share: byVolume.slice(4).reduce((sum, row) => sum + (row.volume30dUsd ?? 0), 0) / totals.volume30dUsd, colour: "#d1d5db" }] : []),
+    ...(byVolume.length > 4 ? [{ label: plural(byVolume.length - 4, "other"), share: byVolume.slice(4).reduce((sum, row) => sum + (row.volume30dUsd ?? 0), 0) / totals.volume30dUsd, colour: "var(--series-rest)" }] : []),
   ].filter((segment) => segment.share > 0) : [];
 
   const venueBars = company.venues.map((name) => {

@@ -25,7 +25,6 @@ function FigurePlaceholder() {
   </div>;
 }
 import { ExchangeMark, VenueLogo } from "@/components/exchange-mark";
-import { Exchange } from "./pro-kit";
 
 /**
  * Pro home: summary cards, a news row, then chart-led sections — a stacked
@@ -400,8 +399,8 @@ export function ProHome() {
               <caption className="sr-only">Every covered market, perpetual and spot, with price, volume, open interest, funding and daily-close changes.</caption>
               <thead><tr>
                 <th className="p-mc-rank">#</th>
-                <th>Company</th>
-                <th className="p-mc-prov">Exchange</th>
+                <th>Company / venue</th>
+                <th className="p-mc-prov">Source</th>
                 <th className="p-mc-type">Type</th>
                 {sortHead("price", "Price", "")}
                 {sortHead("premium", "vs off-chain", "p-mc-prem")}
@@ -446,12 +445,17 @@ export function ProHome() {
                     </tr>
                     {open && rows.map((market) => <tr key={marketKey(market)} className={`p-child-row ${market.offBasis ? "p-off" : ""}`} data-group={childId}>
                       <td className="p-mc-rank" aria-hidden />
+                      {/* Child rows: the venue (exchange, or the chain an issuer token lives on) first, then the source that lists it there. */}
                       <td className="p-mc-market"><span className="p-mc-id p-child-id">
-                        <ExchangeMark provider={market.provider} venue={market.issuer ? null : venueName(market.venue)} size={20} />
-                        <span className="p-mc-text"><strong className="p-mono">{market.label}</strong>
-                          <small className="p-mc-pairline">{market.issuer ? `${market.provider} issuer token on ${market.issuer.chain}` : `${market.provider}${market.provider !== venueName(market.venue) ? ` on ${venueName(market.venue)}` : ""}`}{market.offBasis ? " · other basis" : ""}</small></span>
+                        <VenueLogo name={market.issuer ? market.issuer.chain : venueName(market.venue)} size={22} />
+                        <span className="p-mc-text"><strong>{market.issuer ? market.issuer.chain : venueName(market.venue)}</strong>
+                          <small className="p-mc-pairline p-mono">{market.label}{market.offBasis ? ", other basis" : ""}</small></span>
                       </span></td>
-                      <td className="p-mc-prov">{market.issuer ? <Exchange provider={market.provider} venue={null} sub={`on ${market.issuer.chain}`} /> : <Exchange provider={market.provider} venue={venueName(market.venue)} />}</td>
+                      <td className="p-mc-prov"><span className="p-src-cell">
+                        <ExchangeMark provider={market.provider} venue={null} size={20} />
+                        <span className="p-mc-text"><strong>{market.provider}</strong>
+                          <small className="p-faint">{market.issuer ? "issuer token" : market.provider === venueName(market.venue) ? "direct" : market.marketType === "spot" ? `spot on ${venueName(market.venue)}` : `deployer on ${venueName(market.venue)}`}</small></span>
+                      </span></td>
                       <td className="p-mc-type"><TypeTag type={market.marketType} /></td>
                       <td className="r p-mono">{market.issuer && market.tradeUrl
                         ? <a className="p-ext" href={market.tradeUrl} target="_blank" rel="noopener noreferrer" aria-label={`${marketPrice(market.price)} on ${market.provider}, opens in a new tab`}>{marketPrice(market.price)}</a>

@@ -9,6 +9,9 @@
  *   node scripts/push-prices.mjs                      # dry run, every asset
  *   node scripts/push-prices.mjs --slugs anthropic,openai
  *   node scripts/push-prices.mjs --send               # broadcast
+ *   node scripts/push-prices.mjs --send --policy --watch
+ *       # keeper: every 5 minutes, push only the assets that are due, i.e. whose
+ *       # on-chain price is 24h old or 0.5% away from the live price (POLICY in assets.js)
  *
  * Environment:
  *   PRICE_API_BASE        site to read from (default http://localhost:5173), or --base-url
@@ -21,7 +24,7 @@ import { createRequire } from "node:module";
 import { Contract, Interface, JsonRpcProvider, Wallet, id, parseUnits, formatUnits } from "ethers";
 
 const require = createRequire(import.meta.url);
-const { ASSETS } = require("./assets.js");
+const { ASSETS, POLICY } = require("./assets.js");
 const { normalizeKey } = require("./env.js");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -46,13 +49,15 @@ const ORACLE_ABI = [
 const REJECTIONS = ["UnknownAsset", "ZeroPrice", "PriceTooLarge", "NotNewer", "FromFuture", "TooFewSources", "DeviationTooLarge", "BadDispersion"];
 
 function args(argv) {
-  const out = { send: false, slugs: null, baseUrl: null };
+  const out = { send: false, slugs: null, baseUrl: null, policy: false, watch: null };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === "--send") { out.send = true; }
     else if (arg === "--dry-run") { out.send = false; }
     else if (arg === "--slugs") { out.slugs = argv[++i].split(",").map((slug) => slug.trim()).filter(Boolean); }
     else if (arg === "--base-url") { out.baseUrl = argv[++i]; }
+    else if (arg === "--policy") { out.policy = true; }
+    else if (arg === "--watch") { const next = Number(argv[i + 1]); out.watch = Number.isFinite(next) && next > 0 ? (i += 1, next) : POLICY.checkEverySeconds; }
     else if (arg === "--help" || arg === "-h") { console.log("Usage: push-prices.mjs [--dry-run | --send] [--slugs a,b] [--base-url URL]"); process.exit(0); }
     else { throw new Error(`Unknown argument ${arg}`); }
   }
@@ -87,13 +92,43 @@ async function fetchDerived(baseUrl, slug) {
   return response.json();
 }
 
+/**
+ * Whether an asset is due under POLICY: no round yet, the round is 24 hours
+ * old (less one check, so it never runs past the schedule), or the live price
+ * has moved at least 0.5% from it.
+ */
+function due(update, latest, nowSec) {
+  if (!latest || latest.updatedAt === 0n) { return "no on-chain round yet"; }
+  const age = nowSec - Number(latest.updatedAt);
+  if (age >= POLICY.pushEverySeconds - POLICY.checkEverySeconds) { return `${(age / 3600).toFixed(1)}h since the last update`; }
+  const onchain = Number(latest.price);
+  const moveBps = onchain > 0 ? Math.abs(Number(update.price) / onchain - 1) * 10_000 : Infinity;
+  if (moveBps >= POLICY.deviationBps) { return `moved ${(moveBps / 100).toFixed(2)}% from on-chain`; }
+  return null;
+}
+
+/** Below this the keeper stops sending, so the wallet is never drained to zero. */
+const MIN_BALANCE_WEI = 20_000_000_000_000n; // 0.00002 BNB
+
 async function main() {
   const opts = args(process.argv.slice(2));
+  if (opts.watch) {
+    console.log(`Keeper: checking every ${opts.watch}s; pushing an asset after ${POLICY.pushEverySeconds / 3600}h or a ${(POLICY.deviationBps / 100).toFixed(2)}% move.`);
+    for (;;) {
+      const started = new Date().toISOString();
+      try { await runOnce(opts); } catch (error) { console.error(`[${started}] ${error.message || error}`); }
+      await new Promise((resolve) => setTimeout(resolve, opts.watch * 1000));
+    }
+  }
+  await runOnce(opts);
+}
+
+async function runOnce(opts) {
   const baseUrl = opts.baseUrl || process.env.PRICE_API_BASE || "http://localhost:5173";
   const assets = opts.slugs ? ASSETS.filter((asset) => opts.slugs.includes(asset.slug)) : ASSETS;
   if (!assets.length) { throw new Error("No matching assets."); }
 
-  console.log(`${opts.send ? "SEND" : "DRY RUN"} · prices from ${baseUrl}`);
+  console.log(`[${new Date().toISOString()}] ${opts.send ? "SEND" : "DRY RUN"}${opts.policy ? " (only assets that are due)" : ""}, prices from ${baseUrl}`);
   const updates = [];
   for (const asset of assets) {
     try {
@@ -107,6 +142,22 @@ async function main() {
     }
   }
   if (!updates.length) { console.log("Nothing to push."); process.exitCode = 1; return; }
+
+  if (opts.policy) {
+    const address = deployedOracle();
+    if (!address) { throw new Error("--policy needs a deployed oracle to compare against."); }
+    const reader = new Contract(address, ORACLE_ABI, new JsonRpcProvider(process.env.RPC_URL || "https://data-seed-prebsc-1-s1.bnbchain.org:8545"));
+    const nowSec = Math.floor(Date.now() / 1000);
+    const dueUpdates = [];
+    for (const update of updates) {
+      const symbol = ASSETS.find((asset) => id(asset.symbol) === update.key)?.symbol ?? update.key;
+      const [, latest] = await reader.latestRound(update.key);
+      const reason = due(update, latest, nowSec);
+      if (reason) { dueUpdates.push(update); console.log(`  due  ${symbol.padEnd(11)} ${reason}`); }
+    }
+    if (!dueUpdates.length) { console.log("  Nothing due: every asset is inside 24h and within 0.5% of its on-chain price."); return; }
+    updates.splice(0, updates.length, ...dueUpdates);
+  }
 
   const iface = new Interface(ORACLE_ABI);
   const calldata = iface.encodeFunctionData("updatePrices", [updates]);
@@ -129,6 +180,8 @@ async function main() {
   if (chainId !== expected) { throw new Error(`RPC is chain ${chainId}, expected ${expected}. Set EXPECTED_CHAIN_ID to override.`); }
 
   const signer = new Wallet(key, provider);
+  const balance = await provider.getBalance(signer.address);
+  if (balance < MIN_BALANCE_WEI) { throw new Error(`${signer.address} holds ${formatUnits(balance, 18)} BNB, under the 0.00002 BNB floor: top it up to keep updating.`); }
   const oracle = new Contract(oracleAddress, ORACLE_ABI, signer);
   const [updater, admin] = await Promise.all([oracle.UPDATER_ROLE(), oracle.DEFAULT_ADMIN_ROLE()]);
   const allowed = (await oracle.hasRole(updater, signer.address)) || (await oracle.hasRole(admin, signer.address));

@@ -26,7 +26,7 @@ const METRICS: { key: Metric; label: string; pick: (market: FlatMarket) => numbe
   { key: "oi", label: "Open Interest", pick: (market) => market.openInterestUsd ?? 0 },
   { key: "fees", label: "Est. Fees, 30D", pick: (market) => market.estFees30dUsd ?? 0 },
 ];
-const VENUE_COLOURS = ["#0f1a2b", "#1f87dd", "#f29d12", "#5a4632", "#9ca3af", "#bcd8fb", "#1fbf6c", "#374151"];
+const VENUE_COLOURS = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(--series-6)", "var(--series-7)", "var(--series-8)", "var(--series-4)", "var(--series-5)"];
 const PAGE = 12;
 
 const keyOf = (market: FlatMarket) => `${market.venue}-${market.marketType}-${market.market}`;
@@ -263,7 +263,7 @@ export function ProOverview() {
                   <span className="p-mono p-mix-pct">{share(item.volume, totals.volume30)}</span>
                 </div>)}
                 {["SPV units", "Tokenized notes"].map((name) => <div key={name} className="p-mix-row light" style={{ opacity: 0.55 }}>
-                  <i style={{ background: "#d1d5db" }} /><span className="p-grow">{name} <span className="p-faint">· not covered</span></span><strong className="p-mono">—</strong><span className="p-mono p-mix-pct">—</span>
+                  <i style={{ background: "var(--series-rest)" }} /><span className="p-grow">{name} <span className="p-faint">· not covered</span></span><strong className="p-mono">—</strong><span className="p-mono p-mix-pct">—</span>
                 </div>)}
               </div>
             </div>

@@ -5,9 +5,12 @@ import "./precap.css";
 import "./summary.css";
 import "./pro.css";
 import "./markets.css";
+import "./theme.css";
 import "./trade.css";
 import { cookies } from "next/headers";
 import { ViewModeProvider } from "@/components/view-mode";
+import { ThemeProvider } from "@/components/theme-mode";
+import { defaultTheme, parseTheme, THEME_COOKIE } from "@/components/theme-cookie";
 import { TradeProviders } from "@/components/trade/providers";
 import { parseViewMode, VIEW_MODE_COOKIE } from "@/lib/view-mode";
 
@@ -48,10 +51,14 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Lite or Pro, read here so the first server render is already the right one.
-  const mode = parseViewMode((await cookies()).get(VIEW_MODE_COOKIE)?.value);
+  const jar = await cookies();
+  const mode = parseViewMode(jar.get(VIEW_MODE_COOKIE)?.value);
+  // Light or dark, likewise: the stored pick, else the view's own look.
+  const chosenTheme = parseTheme(jar.get(THEME_COOKIE)?.value);
+  const theme = chosenTheme ?? defaultTheme(mode);
   return (
-    <html lang="en" data-mode={mode} className={`${sans.variable} ${mono.variable}`}>
-      <body className="antialiased"><ViewModeProvider initial={mode}><TradeProviders>{children}</TradeProviders></ViewModeProvider></body>
+    <html lang="en" data-mode={mode} data-theme={theme} className={`${sans.variable} ${mono.variable}`}>
+      <body className="antialiased"><ViewModeProvider initial={mode}><ThemeProvider initial={chosenTheme}><TradeProviders>{children}</TradeProviders></ThemeProvider></ViewModeProvider></body>
     </html>
   );
 }

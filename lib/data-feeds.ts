@@ -32,7 +32,9 @@ export type FeedAsset = { slug: string; name: string; symbol: string };
  * them. Kept here because the app cannot load that CommonJS file; keep the two
  * in step.
  */
-const ORACLE_DEFAULTS = { heartbeat: 6 * 60 * 60, maxDeviationBps: 1500, minSources: 1 };
+const ORACLE_DEFAULTS = { heartbeat: 25 * 60 * 60, maxDeviationBps: 1500, minSources: 1 };
+
+export { UPDATE_POLICY } from "@/lib/update-policy";
 const ORACLE_ASSETS: Record<string, { symbol: string; minSources?: number }> = {
   anthropic: { symbol: "ANTHROPIC", minSources: 3 },
   openai: { symbol: "OPENAI", minSources: 3 },
@@ -455,7 +457,7 @@ const EXPLORERS: Record<number, { name: string; url: string }> = {
 };
 const CHAIN_NAMES: Record<number, string> = { 56: "BNB Chain", 97: "BNB Chain testnet", 31337: "Hardhat local" };
 
-export const KEEPER_COMMAND = "cd contracts && node scripts/push-prices.mjs --send";
+export const KEEPER_COMMAND = "cd contracts && npm run keeper";
 export const DEPLOY_COMMAND = "cd contracts && npm run deploy:bsc-testnet";
 
 export type OnchainRound = { roundId: string; price: number; updatedAt: string; sourceCount: number; dispersionBps: number };

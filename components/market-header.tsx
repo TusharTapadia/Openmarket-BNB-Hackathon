@@ -4,6 +4,7 @@ import { BrandMark } from "./brand-mark";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
 import { ViewToggle } from "./view-mode";
+import { ThemeToggle } from "./theme-mode";
 
 type View = "markets" | "charts" | "fear-greed" | "watchlist" | "ipo" | "data-feeds";
 
@@ -82,6 +83,7 @@ export function MarketHeader({ view = "markets", onView, search }: {
             <span className="pc-currency" aria-label="Prices in US dollars">USD</span>
           )}
           <ViewToggle />
+          <ThemeToggle />
         </div>
       </div>
     </header>

@@ -8,6 +8,7 @@ import { compactUsd, LISTED, marketPrice, TYPE_INFO } from "@/lib/coverage-view"
 import { CompanyMark } from "@/components/company-mark";
 import { ExchangeMark } from "@/components/exchange-mark";
 import { ViewToggle } from "@/components/view-mode";
+import { ThemeToggle } from "@/components/theme-mode";
 import { HEAT_MAP_ENABLED } from "@/components/heat-map";
 import { SkeletonInline } from "@/components/skeleton";
 import { Flash } from "@/components/flash";
@@ -183,6 +184,7 @@ export function ProShell({ active, data, history, search, onNav, children }: {
             {search.value && <button type="button" onClick={() => search.onChange("")} aria-label="Clear search"><X size={13} /></button>}
           </label>}
           <ViewToggle tone="pro" />
+          <ThemeToggle tone="pro" />
         </div>
       </div>
       <div className="p-tape" aria-label="Market ticker">

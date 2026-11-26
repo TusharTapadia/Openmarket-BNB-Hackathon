@@ -4,7 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { FeedHistory, HistoryRow, Interval } from "@/lib/data-feeds";
-import { SkeletonChart, useCrosshair } from "@/components/skeleton";
+import { SkeletonChart } from "@/components/skeleton";
 import { clock, clockSeconds, dayOnly, dayTime, money } from "./shared";
 
 /**
@@ -112,7 +112,6 @@ export function PriceDynamics({ history, interval, onInterval, loading, error, h
   error: string | null;
   headingId: string;
 }) {
-  const chartSkeleton = useCrosshair(loading);
   const lines = useMemo(() => history?.lines ?? [], [history]);
   const sources = lines.filter((line) => line.key !== "agg");
   // By default: the aggregate and the four heaviest sources (the API lists them by weight)
@@ -155,7 +154,7 @@ export function PriceDynamics({ history, interval, onInterval, loading, error, h
       </li>)}
     </ul>}
 
-    {loading ? <div ref={chartSkeleton}><SkeletonChart height={320} label="Loading price history" /></div>
+    {loading ? <SkeletonChart height={320} label="Loading price history" />
       : error ? <p className="df-error" role="alert">Price history could not be loaded. {error}</p>
       : !anything ? <div className="df-chart-empty">
         <strong>Collecting</strong>

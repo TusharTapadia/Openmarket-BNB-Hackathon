@@ -326,3 +326,39 @@ span.df-addr { color: var(--color-ink); }
   .df-sources td[data-label="Weight"] { grid-column: 1 / -1; grid-row: 3; display: flex; align-items: center; gap: 10px; text-align: left; min-width: 0; }
   .df-sources td[data-label="Weight"] .df-bar { margin: 0; }
 }
+
+/* ---------- Update rule and contracts ---------- */
+.df-rule { margin: 6px 0 0; font-size: var(--text-sm); color: var(--color-ink); max-width: 64ch; }
+.df-due { color: var(--color-accent); }
+.df-pad { padding: var(--space-md) var(--space-md) var(--space-sm); }
+.df-contracts th[scope="row"] { display: flex; flex-direction: column; gap: 2px; font-weight: 400; text-align: left; }
+.df-contracts th[scope="row"] strong { font-weight: 500; color: var(--color-ink); }
+.df-contracts th[scope="row"] small { color: var(--color-muted); font-size: var(--text-xs); }
+.df-contract-main { background: var(--color-paper-3); }
+/* Four readings (with the next scheduled update) sit on one row on wide screens. */
+@media (min-width: 901px) { .df-rounds:has(> :nth-child(4)) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* ---------- Verified data sources: one-line cells, a quiet nested row ---------- */
+.df-sources td small, .df-sources th small { white-space: nowrap; }
+.df-sources td, .df-sources tbody th { vertical-align: middle; }
+/* An aggregator's own markets (Atlas → Binance) sit inside a soft tint with an accent
+   rule on the left, padded at both ends so nothing touches the band's edge. */
+.df-row-sub > * { background: color-mix(in oklab, var(--color-ink) 4%, transparent); border-bottom-color: transparent; }
+/* Same padding as every other row so the columns line up; the accent rule marks the nesting. */
+.df-sources .df-row-sub > :first-child { box-shadow: inset 2px 0 0 var(--color-accent); }
+.df-sources .df-row-sub + tr:not(.df-row-sub) > * { border-top: 1px solid var(--color-rule); }
+.df-src-sub { padding-left: 0; }
+.df-src-sub::before { content: "↳"; color: var(--color-muted); margin-right: 6px; font-size: 13px; }
+.df-sources .df-wmethod { white-space: normal; }
+
+/* ---------- Contract chips: BNB Chain logo, short address, copy ---------- */
+.df-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 6px; border: 1px solid var(--color-rule); border-radius: 999px; background: var(--color-paper-2); white-space: nowrap; }
+.df-chip-addr { display: inline-flex; align-items: center; gap: 4px; color: var(--color-ink); text-decoration: none; font-size: 12.5px; }
+.df-chip-addr:hover { color: var(--color-cool); }
+.df-chip-addr:focus-visible, .df-chip-copy:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: 4px; }
+.df-chip-copy { display: inline-grid; place-items: center; width: 22px; height: 22px; border: 0; border-radius: 999px; background: transparent; color: var(--color-muted); cursor: pointer; }
+.df-chip-copy:hover { background: var(--color-paper-3); color: var(--color-ink); }
+.df-chips { display: grid; gap: 6px; }
+.df-chip-row { display: flex; align-items: center; gap: 8px; }
+.df-chip-row small { width: 40px; color: var(--color-muted); font-size: var(--text-xs); }
+.df-sources .df-row-sub td[data-label="Status"] .df-pill { margin-left: 8px; }

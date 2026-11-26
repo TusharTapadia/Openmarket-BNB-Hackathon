@@ -25,10 +25,16 @@ export function Skeleton({ width = "100%", height = 12, radius = 6, style }: { w
   return <span className="sk-block" style={{ width, height, borderRadius: radius, ...style }} />;
 }
 
+/**
+ * Every placeholder plays the crosshair skeleton: the grey shapes give it the
+ * size and layout to trace, then stay hidden under its overlay. It runs while
+ * the placeholder is mounted and stops when the real content replaces it.
+ */
 function Busy({ label = "Loading", className = "", children, style }: { label?: string; className?: string; children: ReactNode; style?: CSSProperties }) {
+  const host = useCrosshair(true);
   return <div className={`sk ${className}`} role="status" aria-busy="true" style={style}>
     <span className="sk-sr">{label}</span>
-    <div aria-hidden>{children}</div>
+    <div aria-hidden className="sk-host" ref={host}>{children}</div>
   </div>;
 }
 
@@ -40,8 +46,9 @@ export function SkeletonLines({ lines = 3, label, gap = 8, height = 12 }: { line
 }
 
 /** A list of rows: a round mark, two lines, and a figure on the right. */
-export function SkeletonList({ rows = 4, label, mark = 28 }: { rows?: number; label?: string; mark?: number }) {
+export function SkeletonList({ rows = 4, label, mark = 28, bar }: { rows?: number; label?: string; mark?: number; bar?: number }) {
   return <Busy label={label} className="sk-list">
+    {bar ? <Skeleton height={bar} radius={2} style={{ marginBottom: 8 }} /> : null}
     {Array.from({ length: rows }, (_, index) => <div className="sk-list-row" key={index}>
       <Skeleton width={mark} height={mark} radius={9999} />
       <span className="sk-col"><Skeleton width="55%" height={11} /><Skeleton width="35%" height={9} /></span>
@@ -70,6 +77,7 @@ export function SkeletonChart({ height = 260, label }: { height?: number; label?
 }
 
 /** Placeholder for a figure shown inline in text. */
-export function SkeletonInline({ width = 64, height = 12 }: { width?: number | string; height?: number }) {
-  return <span className="sk-inline" role="status" aria-busy="true"><span className="sk-sr">Loading</span><Skeleton width={width} height={height} /></span>;
+export function SkeletonInline({ width = 64, height = 12, radius }: { width?: number | string; height?: number; radius?: number }) {
+  const host = useCrosshair(true);
+  return <span className="sk-inline" role="status" aria-busy="true"><span className="sk-sr">Loading</span><span className="sk-inline-host" aria-hidden ref={host}><Skeleton width={width} height={height} radius={radius} /></span></span>;
 }

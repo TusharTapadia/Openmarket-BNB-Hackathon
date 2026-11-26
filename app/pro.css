@@ -458,7 +458,7 @@
 .pro.p-collapsed .p-collapse { justify-content: center; padding: 0; }
 .pro .p-drawer { position: fixed; inset: 0; z-index: 60; }
 .pro .p-drawer-backdrop { all: unset; position: absolute; inset: 0; background: var(--color-scrim); cursor: pointer; }
-.pro .p-drawer-panel { position: absolute; left: 0; top: 0; bottom: 0; width: min(300px, 86vw); background: var(--color-paper-2); overflow-y: auto; box-shadow: 4px 0 24px color-mix(in oklab, var(--color-ink) 15%, transparent); }
+.pro .p-drawer-panel { position: absolute; left: 0; top: 0; bottom: 0; width: min(300px, 86vw); background: var(--color-paper-2); overflow-y: auto; box-shadow: 4px 0 24px color-mix(in oklab, var(--shadow-ink) 15%, transparent); }
 .pro .p-drawer-head { padding: 14px var(--space-md) 0; }
 .pro .p-logo { display: inline-flex; flex: none; border-radius: 9999px; overflow: hidden; background: var(--p-pill); }
 .pro .p-logo .company-mark { width: 100%; height: 100%; min-width: 0; border: 0; border-radius: 9999px; padding: 0; margin: 0; object-fit: cover; font-size: 9px; display: inline-flex; align-items: center; justify-content: center; }
@@ -638,7 +638,7 @@
 .pro .p-dd-btn .p-dd-logos { display: inline-flex; }
 .pro .p-dd-btn .p-dd-logos .p-logo { margin-left: -6px; box-shadow: 0 0 0 2px var(--color-paper-2); }
 .pro .p-dd-btn .p-dd-logos .p-logo:first-child { margin-left: 0; }
-.pro .p-dd-menu { position: absolute; z-index: 50; top: calc(100% + 6px); left: 0; width: 280px; max-width: calc(100vw - 32px); max-height: 360px; overflow-y: auto; background: var(--color-paper-2); border: 1px solid var(--p-line); border-radius: 6px; box-shadow: 0 12px 32px color-mix(in oklab, var(--color-ink) 14%, transparent); padding: 6px; }
+.pro .p-dd-menu { position: absolute; z-index: 50; top: calc(100% + 6px); left: 0; width: 280px; max-width: calc(100vw - 32px); max-height: 360px; overflow-y: auto; background: var(--color-paper-2); border: 1px solid var(--p-line); border-radius: 6px; box-shadow: 0 12px 32px color-mix(in oklab, var(--shadow-ink) 14%, transparent); padding: 6px; }
 .pro .p-dd-item { display: flex; align-items: center; gap: 10px; padding: 7px var(--space-xs); border-radius: 4px; font-size: 13.5px; cursor: pointer; }
 .pro .p-dd-item:hover { background: var(--p-pill); }
 .pro .p-dd-item input { margin: 0; accent-color: var(--p-navy); }

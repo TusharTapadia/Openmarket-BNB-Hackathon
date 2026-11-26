@@ -6,8 +6,9 @@ import { ArrowLeft } from "lucide-react";
 import "@/app/data-feeds.css";
 import type { FeedDetail as FeedDetailData, Interval, Onchain } from "@/lib/data-feeds";
 import { Mark } from "@/components/pc";
-import { Skeleton, SkeletonInline, SkeletonLines, SkeletonTable } from "@/components/skeleton";
-import { OnchainPanel } from "./onchain";
+import { SkeletonInline, SkeletonLines, SkeletonTable } from "@/components/skeleton";
+import { OnchainPanel, onchainFor } from "./onchain";
+import { ContractChip } from "./contract-chip";
 import { PriceDynamics } from "./price-dynamics";
 import { SourcesTable } from "./sources-table";
 import { ago, bps, money, signedPct, useNow, usePoll } from "./shared";
@@ -36,7 +37,7 @@ export function FeedDetail({ slug, variant }: { slug: string; variant: "lite" | 
     {error && !data ? <section className="df-card"><p className="df-error" role="alert">This feed could not be loaded. {error}</p></section> : <>
       <section className="df-head" aria-labelledby="df-asset">
         <div className="df-head-id">
-          {data ? <Mark name={data.asset.name} logo={null} size={48} /> : <Skeleton width={48} height={48} radius={9999} />}
+          {data ? <Mark name={data.asset.name} logo={null} size={48} /> : <SkeletonInline width={48} height={48} radius={9999} />}
           <div>
             <h1 id="df-asset">{data ? `${data.asset.name} / USD` : <SkeletonInline width={185} height={23} />}</h1>
             <p className="df-muted">{data ? <>Feed <span className="df-num">{data.asset.symbol}</span>, price of one share in US dollars</> : <SkeletonInline width={155} />}</p>
@@ -56,8 +57,11 @@ export function FeedDetail({ slug, variant }: { slug: string; variant: "lite" | 
       <dl className="df-method">
         <div><dt>Aggregation</dt><dd>{data ? `Weighted mean of sources within ±${Math.round(data.method.outlierBand * 100)}% of the weighted median` : <SkeletonInline width="100%" />}</dd></div>
         <div><dt>Weights</dt><dd>{data ? `Base trust × log-scaled liquidity. Atlas Oracle ${data.method.trust.classes.atlas}, CoinMarketCap ${data.method.trust.classes.cmc}.` : <SkeletonInline width="100%" />}</dd></div>
-        <div><dt>Sources</dt><dd>{data ? <><span className="df-num">{data.sourcesUsed}</span> active{outliers ? `, ${outliers} outlier${outliers === 1 ? "" : "s"}` : ""}{excluded ? `, ${excluded} excluded` : ""}</> : <SkeletonInline width="75%" />}</dd></div>
-        <div><dt>Spread</dt><dd className="df-num">{data ? bps(data.dispersionBps) : <SkeletonInline width="70%" />}</dd></div>
+        <div><dt>Sources</dt><dd>{data ? <><span className="df-num">{data.sourcesUsed}</span> active{outliers ? `, ${outliers} outlier${outliers === 1 ? "" : "s"}` : ""}{excluded ? `, ${excluded} excluded` : ""}, spread <span className="df-num">{bps(data.dispersionBps)}</span></> : <SkeletonInline width="75%" />}</dd></div>
+        <div><dt>Contracts on BNB Chain</dt><dd className="df-chips">{chain.data?.deployed ? <>
+          {onchainFor(chain.data, slug)?.feed && <span className="df-chip-row"><small>Feed</small><ContractChip address={onchainFor(chain.data, slug)!.feed!} explorer={chain.data.explorer} label={`${data?.asset.symbol ?? slug} feed`} /></span>}
+          <span className="df-chip-row"><small>Oracle</small><ContractChip address={chain.data.oracle} explorer={chain.data.explorer} label="Oracle" /></span>
+        </> : chain.data ? <span className="df-faint">Not deployed yet</span> : <SkeletonInline width="80%" />}</dd></div>
       </dl>
 
       <PriceDynamics history={history} interval={interval} onInterval={setRange} loading={historyPending} error={!history && !historyPending ? error : null} headingId="df-dyn" />

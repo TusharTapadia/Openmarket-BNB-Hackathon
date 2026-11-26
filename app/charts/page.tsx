@@ -14,7 +14,7 @@ import { CompanyChart, type Metric } from "@/components/market-charts";
 import { useRemoteData } from "@/hooks/use-market-data";
 import { rebaseCompany, type CompanyPoint } from "@/lib/market-series";
 import type { Derivatives } from "@/lib/market-summary";
-import { formatDate, formatMoney, formatPrice, formatSignedPercent, premium } from "../data";
+import { formatMoney, formatPrice, formatSignedPercent, premium } from "../data";
 
 type Tracked = {
   slug: string;
@@ -47,9 +47,9 @@ const RANGES = [
 ] as const;
 
 const METRICS: { key: Metric; label: string }[] = [
-  { key: "valuation", label: "Implied valuation" },
+  { key: "valuation", label: "Valuation" },
   { key: "volume", label: "Volume" },
-  { key: "index", label: "OS index" },
+  { key: "index", label: "Index" },
 ];
 
 /** Change between the ends of a window, as a fraction. */
@@ -170,21 +170,21 @@ export default function Charts() {
                 <dl className="feature-rows">
                   <div><dt>Price</dt><dd>{formatPrice(selected?.price ?? null)}</dd></div>
                   <div>
-                    <dt>Reference mark<InfoTip label="mark">The company&apos;s reference mark, set independently of the perpetual venues. The row below is how far the traded price sits from it.</InfoTip></dt>
+                    <dt>Off-chain price<InfoTip label="off-chain price">The price of one share from private-market transactions (AllocationsX). The row below is how far the market price sits from it.</InfoTip></dt>
                     <dd>{formatPrice(selected?.markPrice ?? null)}</dd>
                   </div>
                   <div>
-                    <dt>vs. mark</dt>
+                    <dt>vs off-chain</dt>
                     <dd>{selected && premium(selected) !== null ? formatSignedPercent(premium(selected)) : "—"}</dd>
                   </div>
-                  <div><dt>Venues quoting</dt><dd>{selected?.referenceVenues ?? "—"}</dd></div>
+                  <div><dt>Sources in price</dt><dd>{selected?.referenceVenues ?? "—"}</dd></div>
                   <div><dt>Volume 24h</dt><dd>{formatMoney(selected?.referenceVolume ?? null)}</dd></div>
                 </dl>
               </article>
 
               <article className="feature-card">
                 <div className="feature-head">
-                  <h2>Shares and valuation<InfoTip label="shares">Implied valuation is what the venues themselves publish, averaged across them by volume. These perpetuals are written against a notional 1 billion contracts, so a quoted price is already the company divided by a billion &mdash; the share count beside it is the real cap table and is not multiplied in.</InfoTip></h2>
+                  <h2>Shares and valuation<InfoTip label="shares">Valuation is the weighted price per share times the company&apos;s share count on file (AllocationsX). The last priced round is shown beside it for comparison.</InfoTip></h2>
                   <span>basis</span>
                 </div>
                 <dl className="feature-rows">
@@ -193,15 +193,14 @@ export default function Charts() {
                     <dd>{selected?.shares ? new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 2 }).format(selected.shares) : "—"}</dd>
                   </div>
                   <div>
-                    <dt>Implied valuation</dt>
+                    <dt>Valuation</dt>
                     <dd>{formatMoney(selected?.valuation ?? null)}</dd>
                   </div>
-                  <div><dt>Last round</dt><dd>{selected?.round ?? "—"}</dd></div>
-                  <div><dt>Round date</dt><dd>{selected?.roundDate ? formatDate(selected.roundDate) : "—"}</dd></div>
+                  <div><dt>Last priced round</dt><dd>{selected?.round?.replace("Last priced round ", "") ?? "—"}</dd></div>
                 </dl>
                 {selected && selected.valuation === null && (
                   <p className="feature-empty">
-                    No venue states a valuation for {selected.name}, so none is shown. Price and volume are unaffected.
+                    There is no share count on file for {selected.name}, so no valuation is shown. Price and volume are unaffected.
                   </p>
                 )}
                 {selected && (
@@ -253,7 +252,7 @@ export default function Charts() {
 
               {metric === "valuation" && selected && selected.valuation === null ? (
                 <p className="chart-empty">
-                  No venue states a valuation for {selected.name}, so it cannot be drawn. Volume and OS index are still drawn.
+                  There is no share count on file for {selected.name}, so its valuation cannot be drawn. Volume and the index are still drawn.
                 </p>
               ) : (
                 <CompanyChart points={points} metric={metric} height={400} label={selected?.name ?? ""} />
@@ -269,10 +268,10 @@ export default function Charts() {
 
       <footer className="page-footer">
         <div>
-          <p>Implied valuation is the venues&apos; own figure, weighted by volume. Each writes these perpetuals against a notional 1 billion contracts, so the quoted price is the company divided by a billion; the share count shown beside it is the real cap table, and multiplying the two would count that division twice. Where no venue states a valuation, none is shown.</p>
+          <p>Price is the weighted price per share, the same figure the Data feeds page and the on-chain oracle carry. History is the daily median close of the markets that quote the company on the same unit, scaled so the latest day matches today&apos;s price; markets quoting another unit are left out. Valuation is price times the share count on file. Volume is summed across every market.</p>
           <p>Missing data is shown as &mdash;.</p>
         </div>
-        <span className="footer-brand">Markets</span>
+        <span className="footer-brand">Openmarkets</span>
       </footer>
     </main>
   </div>;

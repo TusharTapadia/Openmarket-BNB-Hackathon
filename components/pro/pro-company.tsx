@@ -35,8 +35,8 @@ const HEADERS: { key: SortKey; label: string }[] = [
 ];
 /** What the perp-only columns hold when just spot rows are showing. */
 const SPOT_LABELS: Partial<Record<SortKey, string>> = { openInterestUsd: "Market cap", fundingRateAnnualized: "Holders" };
-const VENUE_COLOURS = ["#0f1a2b", "#1f87dd", "#f29d12", "#5a4632", "#9ca3af", "#bcd8fb", "#1fbf6c", "#374151"];
-const SHADES = ["#0f1a2b", "#1f87dd", "#bcd8fb", "#f29d12"];
+const VENUE_COLOURS = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(--series-6)", "var(--series-7)", "var(--series-8)", "var(--series-4)", "var(--series-5)"];
+const SHADES = ["var(--series-1)", "var(--series-2)", "var(--series-8)", "var(--series-3)"];
 const money = (value: number) => `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export function ProCompany({ slug }: { slug: string }) {
@@ -114,7 +114,7 @@ export function ProCompany({ slug }: { slug: string }) {
   const ranked = [...company.rows].sort((a, b) => (b.volume30dUsd ?? 0) - (a.volume30dUsd ?? 0));
   const segments = totals.volume30dUsd > 0 ? [
     ...ranked.slice(0, 4).filter((row) => (row.volume30dUsd ?? 0) > 0).map((row, index) => ({ label: `${row.provider} ${row.label}`, value: row.volume30dUsd ?? 0, colour: SHADES[index] })),
-    ...(ranked.length > 4 ? [{ label: plural(ranked.length - 4, "other"), value: ranked.slice(4).reduce((sum, row) => sum + (row.volume30dUsd ?? 0), 0), colour: "#d1d5db" }] : []),
+    ...(ranked.length > 4 ? [{ label: plural(ranked.length - 4, "other"), value: ranked.slice(4).reduce((sum, row) => sum + (row.volume30dUsd ?? 0), 0), colour: "var(--series-rest)" }] : []),
   ].filter((segment) => segment.value > 0) : [];
   const venueBars = company.venues.map((name) => {
     const rows = company.rows.filter((row) => row.venue === name);

@@ -6,11 +6,11 @@ import { band, type Band, type FearGreedPoint } from "@/lib/fear-greed";
 
 /** One colour per band, used by the gauge, the chart and the pills alike. */
 export const BAND_COLOUR: Record<Band, string> = {
-  "Extreme fear": "#c0392b",
-  Fear: "#e07a3f",
-  Neutral: "#d4a62a",
-  Greed: "#5f9e4a",
-  "Extreme greed": "#2f7d32",
+  "Extreme fear": "var(--fg-band-1)",
+  Fear: "var(--fg-band-2)",
+  Neutral: "var(--fg-band-3)",
+  Greed: "var(--fg-band-4)",
+  "Extreme greed": "var(--fg-band-5)",
 };
 
 const BANDS: { from: number; to: number; label: Band }[] = [
@@ -63,7 +63,7 @@ export function FearGreedGauge({ score }: { score: number }) {
             />
           );
         })}
-        <circle cx={needle.x} cy={needle.y} r="7.5" fill="#fff" stroke={BAND_COLOUR[current]} strokeWidth="3.5" />
+        <circle cx={needle.x} cy={needle.y} r="7.5" fill="var(--color-paper-2)" stroke={BAND_COLOUR[current]} strokeWidth="3.5" />
       </svg>
       <div className="fg-gauge-value">
         <div className="fg-score tabular" style={{ color: BAND_COLOUR[current] }}>{value}</div>
@@ -78,7 +78,7 @@ export function BandPill({ score }: { score: number | null }) {
   if (score === null) { return <span className="fg-pill muted">—</span>; }
   const current = band(score);
   return (
-    <span className="fg-pill" style={{ color: BAND_COLOUR[current], borderColor: `${BAND_COLOUR[current]}44`, background: `${BAND_COLOUR[current]}14` }}>
+    <span className="fg-pill" style={{ color: BAND_COLOUR[current], borderColor: `color-mix(in oklab, ${BAND_COLOUR[current]} 27%, transparent)`, background: `color-mix(in oklab, ${BAND_COLOUR[current]} 8%, transparent)` }}>
       {current} · <span className="tabular">{score}</span>
     </span>
   );
@@ -118,23 +118,23 @@ export function FearGreedChart({ points, height = 320 }: { points: readonly Fear
               }}
             />
           ))}
-          <CartesianGrid stroke="#e7ebf0" vertical={false} strokeDasharray="3 4" />
+          <CartesianGrid stroke="var(--color-rule)" vertical={false} strokeDasharray="3 4" />
           <XAxis
             dataKey="time" type="number" scale="time" domain={["dataMin", "dataMax"]}
             tickFormatter={(value) => new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(value))}
-            tickLine={false} axisLine={false} minTickGap={56} tickMargin={14} tick={{ fill: "#7e8a9d", fontSize: 12 }}
+            tickLine={false} axisLine={false} minTickGap={56} tickMargin={14} tick={{ fill: "var(--color-muted)", fontSize: 12 }}
           />
           <YAxis
             orientation="right" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]}
-            tickLine={false} axisLine={false} width={42} tickMargin={8} tick={{ fill: "#7e8a9d", fontSize: 12 }}
+            tickLine={false} axisLine={false} width={42} tickMargin={8} tick={{ fill: "var(--color-muted)", fontSize: 12 }}
           />
           <Tooltip
-            cursor={{ stroke: "#a1abba", strokeDasharray: "4 4" }}
+            cursor={{ stroke: "var(--color-rule-2)", strokeDasharray: "4 4" }}
             labelFormatter={(value) => formatDate(new Date(Number(value)).toISOString())}
             formatter={(value) => [`${Number(value)} · ${band(Number(value))}`, "Reading"]}
-            contentStyle={{ borderRadius: 3, border: "1px solid #e5e9ef", fontSize: 13 }}
+            contentStyle={{ borderRadius: 3, border: "1px solid var(--color-rule-2)", background: "var(--color-paper-2)", color: "var(--color-ink)", fontSize: 13 }}
           />
-          <Line type="monotone" dataKey="score" stroke="#2f3d47" strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
+          <Line type="monotone" dataKey="score" stroke="var(--color-ink-2)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>

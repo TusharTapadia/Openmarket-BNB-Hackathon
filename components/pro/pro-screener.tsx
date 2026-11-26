@@ -23,7 +23,7 @@ import { SkeletonChart, SkeletonList } from "@/components/skeleton";
 type Period = 7 | 30 | 90;
 type SortKey = "name" | "price" | "c24" | "c7" | "c30" | "valuation" | "vsRound" | "premium" | "volume" | "openInterest" | "fees";
 
-const LINE_COLOURS = ["#0f1a2b", "#1f87dd", "#f29d12", "#1fbf6c", "#5a4632", "#9ca3af"];
+const LINE_COLOURS = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(--series-4)", "var(--series-6)", "var(--series-7)"];
 const WATCHLIST = "Watchlist";
 const ALL = "All";
 

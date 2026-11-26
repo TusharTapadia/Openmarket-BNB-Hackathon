@@ -23,7 +23,8 @@ function sourceOrder(source: FeedSource): number {
 
 function Row({ source, now }: { source: FeedSource; now: number }) {
   const status = STATUS[source.status];
-  const rescaled = source.price !== null && Math.abs(source.price - source.rawPrice) > 1e-6;
+  // Only when the per-share price really differs from the quote (not float noise from the 1:1 case).
+  const rescaled = source.price !== null && source.rawPrice > 0 && Math.abs(source.price / source.rawPrice - 1) > 0.0005;
   return <tr className={source.status === "included" ? undefined : "df-row-out"}>
     <td data-label="Status"><span className={`df-pill ${status.tone}`}>{status.text}</span></td>
     <th scope="row" className="df-src">
@@ -41,12 +42,12 @@ function Row({ source, now }: { source: FeedSource; now: number }) {
     </td>
     <td data-label="24h volume" className="df-r df-hide-md">
       {source.volume24h !== null ? <span className="df-num">{compact(source.volume24h)}</span>
-        : source.liquidityUsd !== null ? <><span className="df-num">{compact(source.liquidityUsd)}</span><small>daily liquidity</small></>
+        : source.liquidityUsd !== null ? <><span className="df-num">{compact(source.liquidityUsd)}</span><small>liquidity</small></>
         : <span className="df-faint">—</span>}
     </td>
     <td data-label="Price" className="df-r">
       <span className="df-num">{money(source.price ?? source.rawPrice)}</span>
-      {rescaled && <small>{money(source.rawPrice)} quoted, {source.rawUnit}</small>}
+      {rescaled && <small title={`Quoted ${money(source.rawPrice)}, ${source.rawUnit}`}>from {money(source.rawPrice)}</small>}
       {source.price === null && <small>{source.rawUnit}</small>}
     </td>
     <td data-label="Last updated" className="df-r df-num df-hide-sm">{now ? ago(source.updatedAt, now) : "—"}</td>
@@ -61,7 +62,7 @@ function Row({ source, now }: { source: FeedSource; now: number }) {
 }
 
 /** One exchange market inside an aggregate source, listed for reading: it carries no weight of its own here. */
-function ComponentRow({ component, parent, now }: { component: FeedComponent; parent: string; now: number }) {
+function ComponentRow({ component, parent, now, only }: { component: FeedComponent; parent: string; now: number; only: boolean }) {
   const active = component.status.toLowerCase() === "active";
   return <tr className="df-row-sub">
     <td data-label="Status"><span className={`df-pill ${active ? "df-pill-ok" : "df-pill-muted"}`}>{active ? "Active" : component.status.charAt(0).toUpperCase() + component.status.slice(1)}</span></td>
@@ -76,8 +77,9 @@ function ComponentRow({ component, parent, now }: { component: FeedComponent; pa
     <td data-label="Price" className="df-r"><span className="df-num">{money(component.price)}</span><small>token price</small></td>
     <td data-label="Last updated" className="df-r df-num df-hide-sm">{now && component.updatedAt ? ago(component.updatedAt, now) : "—"}</td>
     <td data-label="Weight" className="df-r df-weight">
-      <span className="df-num">{component.weighting === null ? "—" : `${(component.weighting * 100).toFixed(1)}%`}</span>
-      <small className="df-wmethod">of {parent}, by volume</small>
+      {/* A share of the aggregator's own price, not of this feed: the aggregator row above carries the feed weight. */}
+      {only ? <span className="df-muted">{parent}&apos;s only market</span> : <span className="df-num">{component.weighting === null ? "—" : `${(component.weighting * 100).toFixed(1)}% of ${parent}`}</span>}
+      <small className="df-wmethod">counted once, inside {parent}</small>
     </td>
   </tr>;
 }
@@ -105,7 +107,7 @@ export function SourcesTable({ sources, now, headingId }: { sources: FeedSource[
         </tr></thead>
         <tbody>{rows.map((source) => <Fragment key={source.id}>
           <Row source={source} now={now} />
-          {source.components.map((component) => <ComponentRow key={`${source.id}:${component.exchange}:${component.market}`} component={component} parent={source.venue} now={now} />)}
+          {source.components.map((component) => <ComponentRow key={`${source.id}:${component.exchange}:${component.market}`} component={component} parent={source.venue} now={now} only={source.components.length === 1} />)}
         </Fragment>)}</tbody>
       </table>
     </div>

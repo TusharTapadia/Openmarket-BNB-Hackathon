@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CompanyMark } from "@/components/company-mark";
 import { ExchangeMark } from "@/components/exchange-mark";
 import { InfoTip } from "@/components/info-tip";
+import { useCrosshair } from "@/components/skeleton";
 import { changeOver, formatSignedPercent } from "@/app/data";
 import { compactUsd, VENUE_NAMES, type CompanyView } from "@/lib/coverage-view";
 import { marketChange, marketKey, type HistoryPayload } from "@/components/pro/pro-history";
@@ -112,6 +113,7 @@ export function HeatMap({ companies, loading, variant, history = null }: {
   history?: HistoryPayload | null;
 }) {
   const pro = variant === "pro";
+  const placeholder = useCrosshair(loading);
   const [grouping, setGrouping] = useState<Grouping>("companies");
   const [measure, setMeasure] = useState<Measure>("valuation");
   const [period, setPeriod] = useState<Period>(1);
@@ -191,7 +193,7 @@ export function HeatMap({ companies, loading, variant, history = null }: {
 
   const map = <div className="hm-frame" ref={frame}>
     <div className="hm-map" style={{ height }} role="list" aria-label={`Heat map of ${markets ? "markets" : "companies"} sized by ${MEASURE_LABEL[activeMeasure].toLowerCase()}, coloured by change over ${periodName}`}>
-      {loading ? <div className="hm-placeholder" aria-hidden><span /><span /><span /><span /></div>
+      {loading ? <div ref={placeholder} className="hm-placeholder" aria-hidden><span /><span /><span /><span /></div>
         : !groups.length ? <p className="hm-empty">{markets ? "No market reports this measure yet." : "No company has a figure for this measure yet."}</p>
         : groups.map((group, groupIndex) => {
           const box = groupRects[groupIndex];

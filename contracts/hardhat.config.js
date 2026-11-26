@@ -18,6 +18,10 @@ module.exports = {
     version: "0.8.24",
     settings: { optimizer: { enabled: true, runs: 200 }, evmVersion: "paris" },
   },
+  // Contract verification: Sourcify needs no key; BscScan uses Etherscan's v2 API
+  // with one ETHERSCAN_API_KEY (from etherscan.io) for every chain, BNB Chain included.
+  etherscan: { apiKey: process.env.ETHERSCAN_API_KEY || process.env.ETHERSCAN_KEY || "" },
+  sourcify: { enabled: true },
   networks: {
     bscTestnet: {
       url: process.env.RPC_URL || "https://data-seed-prebsc-1-s1.bnbchain.org:8545",

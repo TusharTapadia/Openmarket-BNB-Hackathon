@@ -1,7 +1,8 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
-import type { Onchain, OnchainAsset, OracleAssetConfig } from "@/lib/data-feeds";
+import type { Onchain, OnchainAsset, OnchainRound, OracleAssetConfig } from "@/lib/data-feeds";
+import { UPDATE_POLICY } from "@/lib/update-policy";
 import { SkeletonLines } from "@/components/skeleton";
 import { ago, bps, duration, money, shortAddress, signedPct } from "./shared";
 
@@ -11,16 +12,48 @@ export function onchainFor(state: Onchain | null, slug: string): OnchainAsset | 
   return state?.deployed ? state.assets.find((asset) => asset.slug === slug) ?? null : null;
 }
 
+const pushEvery = UPDATE_POLICY.pushEverySeconds;
+const threshold = UPDATE_POLICY.deviationBps / 10_000;
+
+/** The update rule in words, for headers and notes. */
+export const UPDATE_RULE = `Updated every ${pushEvery / 3600} hours, or sooner when the live price moves ${(threshold * 100).toFixed(1)}% from the on-chain price. Checked every ${UPDATE_POLICY.checkEverySeconds / 60} minutes.`;
+
+/** Time until an instant, as "in 3h 20m", or "now" once it has passed. */
+export function until(ms: number, now: number): string {
+  const left = Math.round((ms - now) / 60_000);
+  if (left <= 0) { return "now"; }
+  const hours = Math.floor(left / 60), minutes = left % 60;
+  return `in ${hours ? `${hours}h ` : ""}${minutes}m`;
+}
+
+/**
+ * Where a feed stands against the update rule: the gap between the live
+ * aggregate and the on-chain round, when the next scheduled update falls, and
+ * whether the keeper's next check will push it (and why).
+ */
+export function updateStatus(round: OnchainRound | null, live: number | null, now: number) {
+  if (!round) { return { gap: null, nextAt: null, due: "No on-chain round yet" as string | null }; }
+  const gap = live ? live / round.price - 1 : null;
+  const nextAt = Date.parse(round.updatedAt) + pushEvery * 1000;
+  const due = gap !== null && Math.abs(gap) >= threshold ? `Moved ${(Math.abs(gap) * 100).toFixed(2)}%, past ${(threshold * 100).toFixed(1)}%`
+    : now >= nextAt ? "24 hours since the last update" : null;
+  return { gap, nextAt, due };
+}
+
 /** The index table's on-chain cell: the price on the contract and its age, or the reason there is none. */
-export function OnchainCell({ state, slug, configured, now }: { state: Onchain | null; slug: string; configured: boolean; now: number }) {
+export function OnchainCell({ state, slug, configured, now, live = null }: { state: Onchain | null; slug: string; configured: boolean; now: number; live?: number | null }) {
   if (!state) { return <span className="df-faint">Unavailable</span>; }
   if (!state.deployed) { return <span className="df-chain df-chain-off">Not deployed</span>; }
   if (!configured) { return <span className="df-chain df-chain-off">Not on the oracle</span>; }
   const asset = onchainFor(state, slug);
   if (!asset?.round) { return <span className="df-chain df-chain-off">{asset?.error ? "Read failed" : "No round yet"}</span>; }
+  const status = now ? updateStatus(asset.round, live, now) : null;
   return <span className={`df-chain ${asset.stale ? "df-chain-stale" : "df-chain-on"}`}>
     <span className="df-num">{money(asset.round.price)}</span>
     <small>{asset.stale ? "Stale, " : ""}{now ? ago(asset.round.updatedAt, now) : ""}</small>
+    {status && <small className={status.due ? "df-due" : undefined} title={status.due ?? `Next scheduled update ${status.nextAt ? until(status.nextAt, now) : ""}`}>
+      {status.gap === null ? "" : `${signedPct(status.gap)} live, `}{status.due ? "updating" : status.nextAt ? `next ${until(status.nextAt, now)}` : ""}
+    </small>}
   </span>;
 }
 
@@ -89,8 +122,9 @@ export function OnchainPanel({ state, loading, error, slug, oracle, live, now, h
       {asset?.feed && state?.deployed && <Address label="Feed adapter" address={asset.feed} explorer={state.explorer} kind="address" />}
       {state?.deployed && !asset?.feed && <div className="df-kv"><dt>Feed adapter</dt><dd className="df-muted">Not in the deployment file</dd></div>}
       {oracle && <div className="df-kv"><dt>Asset key</dt><dd><span className="df-num df-addr" title={oracle.key}>{shortAddress(oracle.key)}</span><small>keccak256 of {oracle.symbol}</small></dd></div>}
+      <div className="df-kv"><dt>Update rule</dt><dd><span className="df-num">{pushEvery / 3600}h or {(threshold * 100).toFixed(1)}%</span><small>whichever comes first, checked every {UPDATE_POLICY.checkEverySeconds / 60} minutes</small></dd></div>
       {config && <>
-        <div className="df-kv"><dt>Heartbeat</dt><dd><span className="df-num">{duration(config.heartbeat)}</span><small>{fromChain ? "read from the contract" : "from scripts/assets.js"}</small></dd></div>
+        <div className="df-kv"><dt>Heartbeat</dt><dd><span className="df-num">{duration(config.heartbeat)}</span><small>stale after this; {fromChain ? "read from the contract" : "from scripts/assets.js"}</small></dd></div>
         <div className="df-kv"><dt>Deviation guard</dt><dd><span className="df-num">±{(config.maxDeviationBps / 100).toFixed(0)}%</span><small>largest move one update may make</small></dd></div>
         <div className="df-kv"><dt>Minimum sources</dt><dd><span className="df-num">{config.minSources}</span><small>{live.sourcesUsed} in the aggregate now</small></dd></div>
       </>}
@@ -115,7 +149,14 @@ export function OnchainPanel({ state, loading, error, slug, oracle, live, now, h
       <div className="df-round">
         <span className="df-round-label">Live against on-chain</span>
         <strong className={`df-num ${diff === null ? "df-faint" : ""}`}>{signedPct(diff)}</strong>
-        <small>{diff === null ? "Nothing to compare yet" : wouldReject ? "Beyond the deviation guard: the next push would be rejected" : "Within the deviation guard"}</small>
+        <small>{diff === null ? "Nothing to compare yet" : wouldReject ? "Beyond the deviation guard: the next push would be rejected" : Math.abs(diff) >= threshold ? `Past ${(threshold * 100).toFixed(1)}%: pushed on the keeper's next check` : `Within ${(threshold * 100).toFixed(1)}%: no update needed yet`}</small>
+      </div>
+      <div className="df-round">
+        <span className="df-round-label">Next scheduled update</span>
+        {round && now ? <>
+          <strong className="df-num">{until(Date.parse(round.updatedAt) + pushEvery * 1000, now)}</strong>
+          <small>{pushEvery / 3600} hours after the last round, unless the price moves {(threshold * 100).toFixed(1)}% first</small>
+        </> : <><strong className="df-faint">—</strong><small>after the first round</small></>}
       </div>
     </div>}
 
@@ -136,5 +177,58 @@ export function OnchainPanel({ state, loading, error, slug, oracle, live, now, h
         <small>{tooFew ? `${live.sourcesUsed} sources, the oracle wants ${config?.minSources}` : "Passes the source minimum"}</small>
       </div>
     </div>}
+  </section>;
+}
+
+/**
+ * Every contract behind the feeds: the oracle, then one Chainlink-style
+ * AggregatorV3 feed per asset, each linked to the explorer, with the update
+ * rule they run on.
+ */
+export function ContractsCard({ state, now, live }: { state: Onchain | null; now: number; live: Record<string, number | null> }) {
+  if (!state?.deployed) { return null; }
+  const link = (address: string) => state.explorer
+    ? <a className="df-addr" href={`${state.explorer.url}/address/${address}`} target="_blank" rel="noopener noreferrer" aria-label={`${address} on ${state.explorer.name}, opens in a new tab`}><span className="df-num">{shortAddress(address)}</span><ExternalLink size={12} aria-hidden /></a>
+    : <span className="df-num df-addr" title={address}>{shortAddress(address)}</span>;
+  return <section className="df-card df-card-flush" aria-labelledby="df-contracts-h">
+    <header className="df-card-head df-pad">
+      <div>
+        <h2 id="df-contracts-h">Contracts</h2>
+        <p className="df-lede">{UPDATE_RULE} A feed counts as stale once its price is older than the heartbeat.</p>
+      </div>
+      <span className={`df-pill ${state.error ? "df-pill-bad" : state.paused ? "df-pill-warn" : "df-pill-ok"}`}>{state.error ? "Unreachable" : state.paused ? "Paused" : state.chainName}</span>
+    </header>
+    <div className="df-table-wrap">
+      <table className="df-table df-contracts">
+        <thead><tr>
+          <th scope="col">Contract</th>
+          <th scope="col">Address</th>
+          <th scope="col" className="df-r">On-chain price</th>
+          <th scope="col" className="df-r df-hide-sm">Last update</th>
+          <th scope="col" className="df-r df-hide-sm">vs live</th>
+          <th scope="col" className="df-r">Next update</th>
+          <th scope="col" className="df-r df-hide-md">Heartbeat</th>
+        </tr></thead>
+        <tbody>
+          <tr className="df-contract-main">
+            <th scope="row"><strong>PreIpoPriceOracle</strong><small>stores every feed&apos;s rounds</small></th>
+            <td>{link(state.oracle)}</td>
+            <td className="df-r df-faint" colSpan={5}>{state.assets.length} feeds</td>
+          </tr>
+          {state.assets.map((asset) => {
+            const status = now ? updateStatus(asset.round, live[asset.slug] ?? null, now) : null;
+            return <tr key={asset.symbol}>
+              <th scope="row"><strong>{asset.config?.description ?? `${asset.symbol} / USD`}</strong><small>AggregatorV3 feed</small></th>
+              <td>{asset.feed ? link(asset.feed) : <span className="df-faint">Not in the deployment file</span>}</td>
+              <td className="df-r df-num">{asset.round ? money(asset.round.price) : <span className="df-faint">No round yet</span>}</td>
+              <td className="df-r df-num df-hide-sm">{asset.round && now ? ago(asset.round.updatedAt, now) : "—"}</td>
+              <td className={`df-r df-num df-hide-sm ${status?.due ? "df-due" : ""}`}>{status?.gap === null || !status ? "—" : signedPct(status.gap)}</td>
+              <td className={`df-r df-num ${status?.due ? "df-due" : ""}`} title={status?.due ?? undefined}>{!status ? "—" : status.due ? "On the next check" : status.nextAt ? until(status.nextAt, now) : "—"}</td>
+              <td className="df-r df-num df-hide-md">{asset.config ? duration(asset.config.heartbeat) : "—"}</td>
+            </tr>;
+          })}
+        </tbody>
+      </table>
+    </div>
   </section>;
 }

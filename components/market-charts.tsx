@@ -12,9 +12,9 @@ const FULL_LABEL = new Intl.DateTimeFormat("en-US", { day: "numeric", month: "sh
 export type Metric = "valuation" | "volume" | "index";
 
 const METRICS: Record<Metric, { name: string; colour: string; format: (value: number) => string }> = {
-  valuation: { name: "implied valuation", colour: "#1f3fd1", format: (value) => formatMoney(value) },
-  volume: { name: "volume", colour: "#0f766e", format: (value) => formatMoney(value) },
-  index: { name: "index", colour: "#7c3aed", format: (value) => value.toFixed(2) },
+  valuation: { name: "implied valuation", colour: "var(--series-2)", format: (value) => formatMoney(value) },
+  volume: { name: "volume", colour: "var(--series-4)", format: (value) => formatMoney(value) },
+  index: { name: "index", colour: "var(--series-5)", format: (value) => value.toFixed(2) },
 };
 
 /**
@@ -70,7 +70,7 @@ export function CompanyChart({ points, metric, height = 400, label }: {
             cursor={{ stroke: "var(--faint)", strokeDasharray: "4 4" }}
             labelFormatter={(value) => FULL_LABEL.format(new Date(Number(value)))}
             formatter={(value) => [format(Number(value)), `${label} ${name}`]}
-            contentStyle={{ borderRadius: 8, border: "1px solid var(--border)", fontSize: 13, fontWeight: 500 }}
+            contentStyle={{ borderRadius: 8, border: "1px solid var(--color-rule-2)", background: "var(--color-paper-2)", color: "var(--color-ink)", fontSize: 13, fontWeight: 500 }}
           />
           <Area
             type="monotone" dataKey="value" stroke={colour} strokeWidth={2}
