@@ -1,0 +1,22 @@
+{
+  "name": "preipo-price-oracle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "On-chain store for the site's derived pre-IPO share prices, with Chainlink-compatible read adapters. Self-contained: its own tooling, not part of the Next app.",
+  "type": "commonjs",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:bsc-testnet": "hardhat run scripts/deploy.js --network bscTestnet",
+    "push": "node scripts/push-prices.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.6.1",
+    "ethers": "^6.17.0",
+    "hardhat": "^2.30.0"
+  }
+}

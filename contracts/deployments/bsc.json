@@ -1,0 +1,57 @@
+{
+  "chainId": 56,
+  "oracle": "0xA980e3C24759adFf55636512Ee1708bbFC91f65B",
+  "assets": {
+    "ANTHROPIC": {
+      "slug": "anthropic",
+      "key": "0xee2176d5e35f81b98746f5f98677beb44f0167ae70b6518fbb5b5bdc65da8fdd",
+      "feed": "0xC1B78E77d6382A89f1a59b8e604179FE73A882B0"
+    },
+    "OPENAI": {
+      "slug": "openai",
+      "key": "0xbfe1b9d697e35df099bb4711224ecb98f2ce33a5a09fa3cf15dfb83fc9ec3cd9",
+      "feed": "0xc0F8090E4e5cBD2CB075Ea2336ee7fc6bA9d8391"
+    },
+    "ANDURIL": {
+      "slug": "anduril",
+      "key": "0x33a40b8edf877f4086823991d007cdedb096d62e5fbf5ae7a36f338b8b8ccdcc",
+      "feed": "0xb5e92d90e5B881b18fBbFF8fCF70c22b969Ea30B"
+    },
+    "NEURALINK": {
+      "slug": "neuralink",
+      "key": "0xbd060a790f40c3612b69a3e5f55f451940ebf993dce352597e838c02b29e3532",
+      "feed": "0xABF6a9AAEBBC99a7a40D56b1549Db6dCc8CeE6f0"
+    },
+    "DATABRICKS": {
+      "slug": "databricks",
+      "key": "0x0bf812f25cacc694be173fe6fd2b56e3f94f71dcee99e1f1280b2ce7fba46fca",
+      "feed": "0x35E28a4533662034E4B0E02F9db0F4e72Ed3c3e2"
+    },
+    "FIGUREAI": {
+      "slug": "figure-ai",
+      "key": "0x8427599ba4d749558213a02c9f52ac7e448c8e1f95c05494a38240a46d591ce9",
+      "feed": "0x9506390DC49617cE98be026742b2A71DcC2a34EC"
+    },
+    "KALSHI": {
+      "slug": "kalshi",
+      "key": "0x6440b1b074503fc83bd7a23412fb96bff0069c0db2acde5e55b9f59a12c5e8d1",
+      "feed": "0xf27d773ae904a0775b9d1D2b884673F3E64290Db"
+    },
+    "POLYMARKET": {
+      "slug": "polymarket",
+      "key": "0xfd3d8eb913bde917ea1f3fea897fcc664d5548327362097029653cf91cc4e4c3",
+      "feed": "0x3e724feE0248566D0E9C98f01629C771A89a5581"
+    },
+    "OURA": {
+      "slug": "oura",
+      "key": "0x6c4d143ebba7e3ec09ffaa4543e2df4351e2a4240a3d8732bea3f50fccb69b71",
+      "feed": "0x6085eB490B9196B2fDefaa00c5D61ECD1c079e5c"
+    },
+    "SPACEX": {
+      "slug": "spacex",
+      "key": "0x9fd352ac95c287d47bbccf4420d92735fe50f15b7f1bdc85ae12490f555114ab",
+      "feed": "0x5FDA2444235c6364Def4183Ca3ab371014E35ecC"
+    }
+  },
+  "deployedAt": "2026-11-26T16:05:44.067Z"
+}
