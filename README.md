@@ -30,7 +30,7 @@ Openmarkets reads every one of those sources, puts each on the same one-share ba
 
 ```mermaid
 flowchart LR
-  A[Off-chain trades<br/>AllocationsX] --> N
+  A[Off-chain trades<br/>private-market transactions] --> N
   B[Perps<br/>Hyperliquid HIP-3, MEXC, Gate…] --> N
   C[Issuer tokens<br/>PreStocks, OpenStocks, Paimon, xStocks] --> N
   D[Atlas Oracle feeds<br/>ANTB, SPCXB] --> N
@@ -101,7 +101,7 @@ Every weight, unit conversion and exclusion is shown on the site, so the number 
 | **Trade on BNB Chain** | A Trade button on issuer tokens opens a modal with **RainbowKit** wallet connect and live **PancakeSwap** quotes (v3 and Infinity pools). It routes swaps through PancakeSwap's Universal Router with Permit2, and every step is confirmed in the user's own wallet. PreStocks tokens on Solana show Jupiter quotes and hand off to Jupiter. |
 | **Pre-IPO → IPO** | For listed companies (Anthropic on Nasdaq as ANT, SpaceX as SPCX), each issuer's token discount to the public share, its unlock schedule, and Atlas BNB Chain feeds (ANTB, SPCXB). |
 | **IPO timing** | Days until Kalshi traders give even odds of the S-1 going effective, and the latest deadline they price. |
-| **Valuation calculator** | Share price ↔ company valuation for every covered company, using AllocationsX share counts. |
+| **Valuation calculator** | Share price ↔ company valuation for every covered company, using each company's share count on file. |
 
 ## BNB Chain in the stack
 
@@ -170,7 +170,3 @@ public/             Company and venue logos
 - Prices for thinly traded companies (Oura, Databricks, Polymarket) currently rest on one or two sources. The source count is published on-chain with every round so consumers can require more.
 - Some token units are inferred, not published by their issuer (for example Paimon pPOLY is read as valuation in billions). These are flagged on the site and carry reduced trust.
 - The keeper runs as a single process; a production deployment would run it redundantly.
-
-## Disclaimer
-
-Openmarkets is a hackathon project for information only. It is not investment advice, and the on-chain prices are not a guarantee of value. Trades go through third-party protocols from your own wallet at your own risk.
